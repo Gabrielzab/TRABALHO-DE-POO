@@ -10,6 +10,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.JButton;
 import java.awt.event.MouseMotionAdapter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -37,7 +39,11 @@ public class JCalculadora extends JFrame implements ActionListener {
 			public void run() {
 				try {
 					JCalculadora frame = new JCalculadora();
+					frame.setLocationRelativeTo(frame);
+					frame.setUndecorated(true);
 					frame.setVisible(true);
+					frame.setOpacity((float)0.99)
+					frame.setTitle("Calculadora");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -110,7 +116,65 @@ public class JCalculadora extends JFrame implements ActionListener {
 		JButton btnZero = (criarBotao("0", 0, 410, 160, 80));
 		btnZero.addActionListener(this);
 		contentPane.add(btnZero);
+		
+		JButton btnPonto = (criarBotao("0", 160, 410, 80, 80));
+		btnPonto.addActionListener(this);
+		contentPane.add(btnPonto);
+		
+		JPanel panelBotoesNumericos = new JPanel();
+		panelBotoesNumericos.setBounds(0, 170, 240, 320);
+		panelBotoesNumericos.setLayout(new Gridlayout(4,3));
+		panelBotoesNumericos.setBorder(null);
+		panelBotoesNumericos.setBackground(corFundo);
+		panelBotoesNumericos.setOpaque(true);
+		
+		String[] botoesNumericos = {"7", "8", "9", "4", "5", "6", "1", "2", "3"}
+		
+		for(String botao: botoesNumericos) {
+			JButton btn = new JButton(botao);
+			btn.addActionListener(this);
+			btn.setHorizontalAlignment(SwingConstants.CENTER);
+			btn.setFont(new Font("Tahoma", Font.PLAIN, 36));
+			btn.setForeground(corTexto);
+			btn.setFocusPainted(false);
+			btn.setBackground(corBotao);
+			btn.setBorder(new LineBorder(corLinha, 2));
+			panelBotoesNumericos.add(btn);
+		}
+		contentPane.add(panelBotoesNumericos);
+		
+		for(Component component: contentpane.getComponents()) {
+			if(component instaceof JButton) {
+				JButton btn = (JButton)component;
+				alternarCorBotao(btn);
+			}
+			
+			if (component instaceof JPanel) { //panelBotoes 1 a 9
+				for (Component botoesPanel ((Jpanel) component).getComponents()) {
+					if(botoesPanel instaceof JButton) {
+						JButton btn = (JButton)botoesPanel;
+						alternarCorBotao(btn);
+					}
+				}
+			}
+		}
 	}
+	
+	private void alternarCorBotao(JButton jButton) {
+		jButton.addMouseListener(new MouseAdapter()){
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				jButton.setBackground(corFundo);
+			}
+			@Override
+			public void mouseExited(MouseEvent e) {
+				jButton.setBackground(corbotao);
+			}
+		
+		
+		}
+	}
+	
 	private JButton criarBotao(String textoBotao, int x, int y, int width, int height) {
 		JButton JButton = new JButton(textoBotao);
 		JButton.setHorizontalAlignment(SwingConstants.CENTER);
@@ -143,8 +207,85 @@ public class JCalculadora extends JFrame implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
+		String comando = e.getActionComand();
 		
+		if ("=" .equals(comando)) {
+			String expressao = TextFieldDisplay.getText();
+			double resultado = verificarExpressao(expressao);
+			textFieldDisplay.setText(Double.toString(resultado));
+		}
+		else if("c".equalsIgnoreCase(comando)) {
+			//limpar display
+			textFieldDisplay.setText("0");
+		}
+		else if("x".equalsIgnoreCase(comando)) {
+			dispose();
+		}
+		else {
+			String textoDisplay = textFieldDisplay.getText();
+			char LastChar = textoDisplay.charAt(textoDisplay.length()-1);
+			
+			if(isOperador(lastChar) && isOperador(comando.charAt(comando.length()-1)))){
+				
+				textoDisplay = textoDisplay.substring(0, textoDisplay.length()-1);
+				textFieldDisplay.setText(textoDisplay + comando);
+			}
+			else {
+				if(textFieldDisplay.getText().equalsIgnoreCase("0")) {
+					textFieldDisplay.setText(textoDisplay)
+				}
+				
+				textFieldDisplay.setText(textFieldDisplay.getText()+comando)
+			}
+		}
+	}
+	private boolean isOperador(char operador) {
+		return operador == '+' || operador == '-' || operador == '*' || operador == '/' ||;
+	}
+	
+	private double verificarExpressao(String expressao) {
+		try {
+			
+			//REMOVE ESPAÇOS EM BRANCOS E CARACTERES INVÁLIDOS
+			expressao = expressao.replaceAll("\\s+", "")
+					
+			if (expressao.isEmpty()) {
+				return 0;
+			}
+			//DIVIDE A EXPRESSAO EM PARTES SEPARADAS PELOS OPERADORES
+			Pattern pattern = Pattern.compile("[+\\-*/]");
+			Matcher matcher = pattern.matcher(expressao);
+			String[] partesExpressao = pattern.split(expressao);
+			
+			//converte as partes em numeros e operadores
+			double resultado = Double.parseDouble(partesExpressao[0]);
+			int = 1;
+			
+			//realiza as operações sequencialmente
+			while(matcher.find()) {
+				String operador = matcher.group();
+				double valor = Double.parseDouble(partesExpressao[i++]);
+				
+				switch(operador) {
+				case "+":
+					resultado += valor;
+					break;
+				case "-":
+					resultado -= valor;
+					break;
+				case "*":
+					resultado *= valor;
+					break;
+				case "/":
+					resultado /= valor;
+					break;
+				}
+			
+			}
+			return resultado;
+		}
+		catch(NumberFormatException | ArithmeticException e) {
+			return 0;
+		}
 	}
 
-}
